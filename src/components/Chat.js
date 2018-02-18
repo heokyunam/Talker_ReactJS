@@ -1,41 +1,39 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import PropTypes from 'prop-types';
 
 class Chat extends Component {
-	constructor(props) {
-		super(props);
-	}
-	chatting() {
-		//사용자가 글을 입력한 후 버튼을 누른 경우 메시지가 전송이 되어야 한다
-		const chatMsg = document.getElementById('chatMsg').value;
-		//axios는 POST를 도와주는 API다./ fetch는 body값을 입력하는게 잘 안되서 바꿨다
-		axios.post(
-			this.props.ip + '/talk/'
-		 	+ this.props.author, 
-		{
-			msg:chatMsg,
-			date:Date.now()
-		}).
-		catch(err => console.error(err));
-	}
+	//채팅 입력 클래스 : Chat
+	//하고 싶은 말을 입력하는 칸과, 입력데이터를 전송하는 칸이 나뉜다
 	render() {
+		const {onChat, defaultValue} = this.props;
 		return (
 			<div className="chat">
 				원하는 말을 입력하세요
 				<br />
-				<input id="chatMsg" defaultValue="hello"/>
-				<input type="button" value="입력" onClick={this.chatting.bind(this)}/>
+				<input id="chatMsg" 
+						defaultValue={defaultValue}
+						onChange={this._onUpdate}/>
+				<input type="button" 
+						value='입력'
+						onClick={onChat}/>
 			</div>
 		);
 	}
+
+	//onChange에서 매개변수를 통해 해당 타깃에 접근이 가능하다
+	//매 수정때마다 App.js의 state에 접근을 해 수정을 해준다
+	_onUpdate = (e) => {
+		this.props.onUpdate(e.target.value);
+	}
 }
 
-//테스트를 할때에는 nodejs서버와 같은 주소이기 때문에
-//디폴트데이터는 로컬호스트로 처리한다.
-//하지만 실제로 사용할때에는 nodejs와 react가 따로 돌기때문에 주의해야한다
-Chat.defaultProps = {
-	ip: 'http://localhost:8080',
-	author: 'unknown'
+Chat.propTypes = {
+	ip:PropTypes.string,
+	author:PropTypes.string,
+	defaultValue:PropTypes.string,
+	//onChat: 입력버튼을 누른 경우 처리 함수
+	onChat:PropTypes.func.isRequired,
+	//onChat: 입력 텍스트가 수정된 경우 처리 함수
+	onUpdate:PropTypes.func.isRequired
 }
-
 export default Chat;
